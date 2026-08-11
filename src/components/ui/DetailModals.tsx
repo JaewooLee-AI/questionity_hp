@@ -65,7 +65,18 @@ export function RoomDetailModal({ room, onClose, onOpenLeadForm }: RoomDetailMod
   if (Array.isArray(room.curriculum_json)) {
     curriculumList = room.curriculum_json;
   } else if (typeof room.curriculum_json === "object" && room.curriculum_json !== null) {
-    curriculumList = Object.entries(room.curriculum_json).map(([week, text]) => `${week}: ${text}`);
+    curriculumList = Object.entries(room.curriculum_json).map(([week, text]) => {
+      if (typeof text === "string") return `${week}: ${text}`;
+      if (typeof text === "object" && text !== null) {
+        const t = text as any;
+        const topic = t.topic || t.title || week;
+        const range = t.range ? ` (범위: ${t.range})` : "";
+        const questions = Array.isArray(t.questions) ? ` | 💬 토론: ${t.questions.join(" / ")}` : (t.questions ? ` | 💬 토론: ${t.questions}` : "");
+        const mission = t.mission ? ` | 🎯 미션: ${t.mission}` : "";
+        return `${topic}${range}${questions}${mission}`;
+      }
+      return `${week}: ${String(text)}`;
+    });
   } else {
     curriculumList = [
       "1주차: 도서의 서사 구조 및 핵심 질문 발굴",
