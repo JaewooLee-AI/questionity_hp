@@ -51,7 +51,7 @@ export function SpaceBento() {
             PHYSICAL COMMUNITY HUB
           </span>
           <h2 className="font-heading text-3xl sm:text-5xl font-semibold text-[#1d1d1f] tracking-tight">
-            질문이 머무는 오프라인 무대, <br className="sm:hidden" />
+            질문이 머무는 오프라인 무대, <br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#0066cc] via-[#0071e3] to-[#2997ff]">
               Work &amp; Share 공간 브릿지
             </span>
