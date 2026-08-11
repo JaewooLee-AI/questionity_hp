@@ -11,16 +11,17 @@ export function VirtualPreviewMarquee() {
 
   const fetchRoomsAndReviews = async () => {
     try {
-      // 1. Fetch rooms from Supabase 'rooms' table according to admin guide schema
+      // 1. Fetch real rooms from Supabase 'rooms' table according to admin guide schema
       const { data: roomsData, error: roomsError } = await supabase
         .from("rooms")
         .select("id, title, book_title, book_author, book_description, book_image_url, publisher, target_audience, curriculum_json, meeting_type, location, schedule_text, price_text, max_capacity, created_at, is_ai_generated, is_custom_created")
         .order("created_at", { ascending: false });
 
       const roomsMap: Record<string, any> = {};
+      let realRooms: VirtualRoom[] = [];
 
       if (roomsData && roomsData.length > 0 && !roomsError) {
-        const parsedRooms = roomsData.map((r: any) => {
+        realRooms = roomsData.map((r: any) => {
           roomsMap[r.id] = r;
           return {
             id: r.id,
@@ -39,38 +40,47 @@ export function VirtualPreviewMarquee() {
             price_text: r.price_text || "파운딩 0원 (무료)",
             max_capacity: r.max_capacity || 12,
             is_ai_generated: r.is_ai_generated ?? true,
-            is_custom_created: r.is_custom_created ?? false,
-            predicted_by: r.is_custom_created ? "관리자 직접 개설" : "AI 큐레이션",
+            is_custom_created: r.is_custom_created ?? true, // Opened in admin
+            predicted_by: "관리자 개설 독서방",
             vote_count: 50,
           };
         });
-        setRooms(parsedRooms);
+
+        // 🌟 Merge real rooms from Supabase + fallback AI rooms
+        setRooms([...realRooms, ...FALLBACK_VIRTUAL_ROOMS]);
+      } else {
+        setRooms(FALLBACK_VIRTUAL_ROOMS);
       }
 
-      // 2. Fetch reviews from Supabase 'reviews' table according to admin guide schema
+      // 2. Fetch real reviews from Supabase 'reviews' table
       const { data: reviewsData, error: reviewsError } = await supabase
         .from("reviews")
         .select("id, room_id, fake_user_persona, content, created_at")
         .order("created_at", { ascending: false });
 
       if (reviewsData && reviewsData.length > 0 && !reviewsError) {
-        setReviews(
-          reviewsData.map((rev: any) => {
-            const matchedRoom = roomsMap[rev.room_id];
-            return {
-              id: rev.id,
-              room_id: rev.room_id,
-              book_title: matchedRoom?.book_title || matchedRoom?.title || "추천 필독서",
-              author: matchedRoom?.book_author || "추천 저자",
-              content: rev.content || "이 책은 삶의 방향과 본질에 대한 명확한 통찰을 전해줍니다.",
-              fake_user_persona: rev.fake_user_persona || "AI 예측 멤버",
-              rating: 5.0,
-            };
-          })
-        );
+        const realReviews = reviewsData.map((rev: any) => {
+          const matchedRoom = roomsMap[rev.room_id];
+          return {
+            id: rev.id,
+            room_id: rev.room_id,
+            book_title: matchedRoom?.book_title || matchedRoom?.title || "추천 필독서",
+            author: matchedRoom?.book_author || "추천 저자",
+            content: rev.content || "이 책은 삶의 방향과 본질에 대한 명확한 통찰을 전해줍니다.",
+            fake_user_persona: rev.fake_user_persona || "AI 예측 멤버",
+            rating: 5.0,
+          };
+        });
+
+        // 🌟 Merge real reviews from Supabase + fallback AI reviews
+        setReviews([...realReviews, ...FALLBACK_VIRTUAL_REVIEWS]);
+      } else {
+        setReviews(FALLBACK_VIRTUAL_REVIEWS);
       }
     } catch (err) {
       console.warn("Supabase fetch using fallback data:", err);
+      setRooms(FALLBACK_VIRTUAL_ROOMS);
+      setReviews(FALLBACK_VIRTUAL_REVIEWS);
     }
   };
 
@@ -117,12 +127,12 @@ export function VirtualPreviewMarquee() {
         <h2 className="font-heading text-3xl sm:text-5xl font-semibold text-[#1d1d1f] tracking-tight">
           대학로 개설 독서방 &amp; <br className="sm:hidden" />
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#0066cc] via-[#0071e3] to-[#2997ff]">
-            실제 모임 기대평 탐색
+            실제 모임 기대평 프리뷰
           </span>
         </h2>
         <p className="text-base sm:text-lg text-[#6e6e73] font-normal max-w-2xl mx-auto break-keep">
-          Questionity 관리자 파이프라인에서 개설된 실제 독서 모임과 멤버들의 기대평입니다. 
-          도서 표지를 클릭하여 4주 커리큘럼 및 모임 상세 정보를 살펴보고 파운딩 1호 대기자로 등록해 주세요.
+          어드민 관리자가 직접 개설한 실제 독서방과 AI가 큐레이션한 가상 독서 카탈로그입니다. 
+          도서 표지를 클릭하여 4주 커리큘럼 및 상세 정보를 살펴보고 파운딩 1호 대기자로 등록해 주세요.
         </p>
       </div>
 
