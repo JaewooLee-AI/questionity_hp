@@ -46,13 +46,7 @@ export function FloatingChat() {
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsOpen(true);
-    }, 10000);
-    return () => clearTimeout(timer);
-  }, []);
-
+  // Proactive Trigger 2: 5s idle prompt after chat opened
   useEffect(() => {
     if (isOpen && !hasIdlePrompted && messages.length === 1) {
       const idleTimer = setTimeout(() => {
@@ -70,6 +64,7 @@ export function FloatingChat() {
     }
   }, [isOpen, hasIdlePrompted, messages.length]);
 
+  // Auto scroll down
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
