@@ -47,13 +47,13 @@ export function VirtualPreviewMarquee() {
           };
         });
 
-        // 🌟 Filter ONLY AI-curated rooms for this marquee section
-        const aiOnlyRooms = realRooms.filter((r) => !r.is_custom_created);
+        // 🌟 Filter ONLY AI-curated rooms for this marquee section (exclude custom admin rooms)
+        const aiOnlyRooms = realRooms.filter((r) => r.is_ai_generated !== false && r.is_custom_created !== true);
 
         if (aiOnlyRooms.length > 0) {
           setRooms(aiOnlyRooms);
         } else {
-          setRooms(realRooms);
+          setRooms(FALLBACK_VIRTUAL_ROOMS);
         }
       } else {
         if (roomsError) console.error("Supabase rooms fetch error:", roomsError);
