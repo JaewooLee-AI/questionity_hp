@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Sparkles, ThumbsUp, BookOpen, Star, Info } from "lucide-react";
+import { Sparkles, ThumbsUp, BookOpen, Star, Info, ShieldCheck } from "lucide-react";
 import { VirtualRoom, VirtualReview } from "@/lib/mockData";
 import { ResponsiveLeadForm } from "@/components/ui/ResponsiveLeadForm";
 import { RoomDetailModal, ReviewDetailModal } from "@/components/ui/DetailModals";
@@ -15,12 +15,18 @@ interface MarqueeProps {
 export function Marquee({ rooms, reviews }: MarqueeProps) {
   const [isPaused, setIsPaused] = useState(false);
   const [selectedBook, setSelectedBook] = useState<string | null>(null);
+  const [selectedRoomId, setSelectedRoomId] = useState<string | undefined>(undefined);
 
   const [activeRoomDetail, setActiveRoomDetail] = useState<VirtualRoom | null>(null);
   const [activeReviewDetail, setActiveReviewDetail] = useState<VirtualReview | null>(null);
 
   const duplicatedRooms = [...rooms, ...rooms, ...rooms];
   const duplicatedReviews = [...reviews, ...reviews, ...reviews];
+
+  const handleOpenLead = (bookTitle: string, roomId?: string) => {
+    setSelectedBook(bookTitle);
+    setSelectedRoomId(roomId);
+  };
 
   return (
     <div className="space-y-10 overflow-hidden py-4">
@@ -46,11 +52,18 @@ export function Marquee({ rooms, reviews }: MarqueeProps) {
             >
               <div className="space-y-3 text-left">
                 <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-white text-[#0066cc] border border-black/10 shadow-2xs">
-                    <Sparkles className="w-3 h-3 text-[#0066cc]" /> {room.predicted_by || "AI"} Predicted
+                  <span
+                    className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${
+                      room.is_custom_created
+                        ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30"
+                        : "bg-white text-[#0066cc] border border-black/10 shadow-2xs"
+                    }`}
+                  >
+                    {room.is_custom_created ? <ShieldCheck className="w-3 h-3 text-emerald-600" /> : <Sparkles className="w-3 h-3 text-[#0066cc]" />}
+                    {room.is_custom_created ? "관리자 개설" : `${room.predicted_by || "AI"} Predicted`}
                   </span>
                   <span className="text-[11px] font-mono text-[#6e6e73] bg-white px-2 py-0.5 rounded-md border border-black/5">
-                    {room.target_audience ? "타깃 분석 완료" : "인문/소설"}
+                    {room.meeting_type === "online" ? "온라인" : "대학로 오프라인"}
                   </span>
                 </div>
 
@@ -81,7 +94,7 @@ export function Marquee({ rooms, reviews }: MarqueeProps) {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelectedBook(room.title);
+                    handleOpenLead(room.title, room.id);
                   }}
                   className="apple-button-primary px-3.5 py-1.5 text-xs flex items-center gap-1 shadow-sm active:scale-95 transition-all"
                 >
@@ -141,21 +154,25 @@ export function Marquee({ rooms, reviews }: MarqueeProps) {
       <RoomDetailModal
         room={activeRoomDetail}
         onClose={() => setActiveRoomDetail(null)}
-        onOpenLeadForm={(bookTitle) => setSelectedBook(bookTitle)}
+        onOpenLeadForm={(bookTitle, roomId) => handleOpenLead(bookTitle, roomId)}
       />
 
       {/* Review Detail Modal */}
       <ReviewDetailModal
         review={activeReviewDetail}
         onClose={() => setActiveReviewDetail(null)}
-        onOpenLeadForm={(bookTitle) => setSelectedBook(bookTitle)}
+        onOpenLeadForm={(bookTitle, roomId) => handleOpenLead(bookTitle, roomId)}
       />
 
       {/* Lead Collection Form Modal */}
       <ResponsiveLeadForm
         isOpen={Boolean(selectedBook)}
-        onClose={() => setSelectedBook(null)}
+        onClose={() => {
+          setSelectedBook(null);
+          setSelectedRoomId(undefined);
+        }}
         defaultBookTitle={selectedBook || undefined}
+        defaultRoomId={selectedRoomId}
       />
     </div>
   );

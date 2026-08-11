@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import confetti from "canvas-confetti";
 import { toast } from "sonner";
-import { Loader2, Sparkles, X, BookOpen, User, Phone, Mail } from "lucide-react";
+import { Loader2, Sparkles, X, BookOpen, User, Phone, Mail, Calendar } from "lucide-react";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { submitLeadAction } from "@/app/actions/submitLead";
 
@@ -16,6 +16,7 @@ const formSchema = z.object({
   email: z.string().email("올바른 이메일 주소를 입력해 주세요."),
   category: z.string().optional(),
   book_title: z.string().optional(),
+  preferred_schedule: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -24,9 +25,10 @@ interface ResponsiveLeadFormProps {
   isOpen: boolean;
   onClose: () => void;
   defaultBookTitle?: string;
+  defaultRoomId?: string;
 }
 
-export function ResponsiveLeadForm({ isOpen, onClose, defaultBookTitle }: ResponsiveLeadFormProps) {
+export function ResponsiveLeadForm({ isOpen, onClose, defaultBookTitle, defaultRoomId }: ResponsiveLeadFormProps) {
   const isMobile = useIsMobile();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -40,6 +42,7 @@ export function ResponsiveLeadForm({ isOpen, onClose, defaultBookTitle }: Respon
     defaultValues: {
       book_title: defaultBookTitle || "",
       category: "인문/소설/에세이",
+      preferred_schedule: "평일 저녁 (19:30~)",
     },
   });
 
@@ -56,7 +59,10 @@ export function ResponsiveLeadForm({ isOpen, onClose, defaultBookTitle }: Respon
   const onSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     try {
-      const res = await submitLeadAction(values);
+      const res = await submitLeadAction({
+        ...values,
+        room_id: defaultRoomId,
+      });
       if (res.success) {
         confetti({
           particleCount: 100,
@@ -64,7 +70,7 @@ export function ResponsiveLeadForm({ isOpen, onClose, defaultBookTitle }: Respon
           origin: { y: 0.6 },
         });
         toast.success("파운딩 멤버 1호 대기자로 등록되었습니다! 🎉", {
-          description: "대학로 Questionity 오픈 일정 및 특별 혜택을 입력해주신 연락처로 우선 안내드립니다.",
+          description: "대학로 Questionity 오픈 일정 및 1호 무료 초대권을 입력해주신 연락처로 안내드립니다.",
         });
         reset();
         onClose();
@@ -84,14 +90,14 @@ export function ResponsiveLeadForm({ isOpen, onClose, defaultBookTitle }: Respon
     <div className="space-y-4 text-left">
       <div className="text-center sm:text-left pr-14 sm:pr-16">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#0071e3]/10 text-[#0066cc] border border-[#0071e3]/20 mb-2">
-          <Sparkles className="w-3.5 h-3.5" /> 파운딩 멤버 100인 모집
+          <Sparkles className="w-3.5 h-3.5" /> 파운딩 멤버 100인 사전 모집
         </div>
         <h3 className="font-heading text-xl sm:text-2xl font-semibold text-[#1d1d1f] tracking-tight">
           {defaultBookTitle ? `[${defaultBookTitle}] 개설 대기 등록` : "Questionity 파운딩 멤버 신청"}
         </h3>
         <p className="text-sm text-[#6e6e73] mt-1 font-normal">
           {defaultBookTitle
-            ? "원하시는 독서 모임의 첫 번째 파운딩 대기자가 되어주세요."
+            ? "관리자가 개설한 독서 모임의 첫 번째 파운딩 대기자가 되어주세요."
             : "대학로 대표 커뮤니티의 혜택과 시크릿 이벤트를 가장 먼저 만나보세요."}
         </p>
       </div>
@@ -106,7 +112,7 @@ export function ResponsiveLeadForm({ isOpen, onClose, defaultBookTitle }: Respon
                 type="text"
                 readOnly
                 {...register("book_title")}
-                className="w-full bg-[#f5f5f7] border border-black/10 rounded-xl pl-9 pr-4 py-2 text-sm text-[#1d1d1f] focus:outline-none"
+                className="w-full bg-[#f5f5f7] border border-black/10 rounded-xl pl-9 pr-4 py-2 text-sm text-[#1d1d1f] focus:outline-none font-semibold"
               />
             </div>
           </div>
@@ -152,6 +158,22 @@ export function ResponsiveLeadForm({ isOpen, onClose, defaultBookTitle }: Respon
             />
           </div>
           {errors.email && <p className="text-xs text-rose-500 mt-1">{errors.email.message}</p>}
+        </div>
+
+        <div>
+          <label className="block text-xs font-medium text-[#1d1d1f] mb-1">희망 모임 일시/시간대</label>
+          <div className="relative">
+            <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-[#86868b]" />
+            <select
+              {...register("preferred_schedule")}
+              className="w-full bg-[#f5f5f7] border border-black/10 rounded-xl pl-9 pr-4 py-2 text-sm text-[#1d1d1f] focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-colors"
+            >
+              <option value="평일 저녁 (19:30~)">평일 저녁 (19:30~)</option>
+              <option value="주말 오후 (14:00~)">주말 오후 (14:00~)</option>
+              <option value="주말 저녁 (18:00~)">주말 저녁 (18:00~)</option>
+              <option value="온라인 라이브 참여">온라인 라이브 참여</option>
+            </select>
+          </div>
         </div>
 
         <div>

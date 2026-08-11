@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { X, Sparkles, ThumbsUp, BookOpen, Star, MapPin, Users, Layers } from "lucide-react";
+import { X, Sparkles, ThumbsUp, BookOpen, Star, MapPin, Users, Layers, Calendar, Tag, ShieldCheck } from "lucide-react";
 import { VirtualRoom, VirtualReview } from "@/lib/mockData";
 
 interface RoomDetailModalProps {
   room: VirtualRoom | null;
   onClose: () => void;
-  onOpenLeadForm: (bookTitle: string) => void;
+  onOpenLeadForm: (bookTitle: string, roomId?: string) => void;
 }
 
 export function RoomDetailModal({ room, onClose, onOpenLeadForm }: RoomDetailModalProps) {
@@ -56,12 +56,20 @@ export function RoomDetailModal({ room, onClose, onOpenLeadForm }: RoomDetailMod
         </button>
 
         {/* Header Badge */}
-        <div className="flex items-center gap-2 pr-16 sm:pr-20">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#0071e3]/10 text-[#0066cc] border border-[#0071e3]/20">
-            <Sparkles className="w-3.5 h-3.5" /> ✨ AI Predicted Room
+        <div className="flex flex-wrap items-center gap-2 pr-16 sm:pr-20">
+          <span
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${
+              room.is_custom_created
+                ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/30"
+                : "bg-[#0071e3]/10 text-[#0066cc] border border-[#0071e3]/20"
+            }`}
+          >
+            {room.is_custom_created ? <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> : <Sparkles className="w-3.5 h-3.5 text-[#0066cc]" />}
+            {room.is_custom_created ? "👑 관리자 개설 모임" : "✨ AI 큐레이션 독서방"}
           </span>
+
           <span className="text-xs font-mono text-[#6e6e73] bg-[#f5f5f7] px-2.5 py-1 rounded-full border border-black/5">
-            Admin Sync Ready
+            {room.meeting_type === "online" ? "💻 온라인 진행" : "📍 오프라인 라운지"}
           </span>
         </div>
 
@@ -82,7 +90,7 @@ export function RoomDetailModal({ room, onClose, onOpenLeadForm }: RoomDetailMod
               </h3>
               {room.book_title && (
                 <p className="text-xs font-semibold text-[#0066cc] mt-1">
-                  📖 {room.book_title} {room.book_author ? `| 저자: ${room.book_author}` : ""}
+                  📖 {room.book_title} {room.book_author ? `| 저자: ${room.book_author}` : ""} {room.publisher ? `(${room.publisher})` : ""}
                 </p>
               )}
             </div>
@@ -122,21 +130,37 @@ export function RoomDetailModal({ room, onClose, onOpenLeadForm }: RoomDetailMod
           </div>
         </div>
 
-        {/* Detailed Spec Grid */}
+        {/* Detailed Spec Grid (Admin Schema Supported) */}
         <div className="grid grid-cols-2 gap-3 text-xs bg-[#f5f5f7] p-4 rounded-2xl border border-black/5">
           <div className="flex items-center gap-2 text-[#6e6e73]">
             <MapPin className="w-4 h-4 text-[#0066cc] shrink-0" />
             <div>
-              <div className="font-medium text-[#1d1d1f]">대학로 오프라인</div>
-              <div>Work &amp; Share 라운지</div>
+              <div className="font-medium text-[#1d1d1f]">모임 장소</div>
+              <div>{room.location || "대학로 Work & Share 라운지"}</div>
             </div>
           </div>
 
           <div className="flex items-center gap-2 text-[#6e6e73]">
-            <ThumbsUp className="w-4 h-4 text-[#0066cc] shrink-0" />
+            <Calendar className="w-4 h-4 text-[#0066cc] shrink-0" />
             <div>
-              <div className="font-medium text-[#1d1d1f]">현재 개설 투표</div>
-              <div>{room.vote_count || 45}명 찬성 등록</div>
+              <div className="font-medium text-[#1d1d1f]">일시 및 일정</div>
+              <div>{room.schedule_text || "매주 수요일 19:30 (10/15 개강)"}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-[#6e6e73]">
+            <Tag className="w-4 h-4 text-[#0066cc] shrink-0" />
+            <div>
+              <div className="font-medium text-[#1d1d1f]">참가 비용</div>
+              <div className="text-[#0066cc] font-semibold">{room.price_text || "파운딩 0원 (무료)"}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-[#6e6e73]">
+            <Users className="w-4 h-4 text-[#0066cc] shrink-0" />
+            <div>
+              <div className="font-medium text-[#1d1d1f]">선착순 정원</div>
+              <div>최대 {room.max_capacity || 12}명 (선착순 마감)</div>
             </div>
           </div>
         </div>
@@ -152,7 +176,7 @@ export function RoomDetailModal({ room, onClose, onOpenLeadForm }: RoomDetailMod
           <button
             onClick={() => {
               onClose();
-              onOpenLeadForm(room.title);
+              onOpenLeadForm(room.title, room.id);
             }}
             className="apple-button-primary px-6 py-2.5 text-xs font-semibold shadow-md flex items-center gap-1.5"
           >
@@ -168,7 +192,7 @@ export function RoomDetailModal({ room, onClose, onOpenLeadForm }: RoomDetailMod
 interface ReviewDetailModalProps {
   review: VirtualReview | null;
   onClose: () => void;
-  onOpenLeadForm: (bookTitle: string) => void;
+  onOpenLeadForm: (bookTitle: string, roomId?: string) => void;
 }
 
 export function ReviewDetailModal({ review, onClose, onOpenLeadForm }: ReviewDetailModalProps) {
@@ -242,7 +266,7 @@ export function ReviewDetailModal({ review, onClose, onOpenLeadForm }: ReviewDet
           <button
             onClick={() => {
               onClose();
-              onOpenLeadForm(review.book_title);
+              onOpenLeadForm(review.book_title, review.room_id);
             }}
             className="apple-button-primary px-6 py-2.5 text-xs font-semibold shadow-md flex items-center gap-1.5"
           >
