@@ -35,7 +35,7 @@ export function Marquee({ rooms, reviews }: MarqueeProps) {
           transition={{
             repeat: Infinity,
             ease: "linear",
-            duration: 35,
+            duration: 75,
           }}
         >
           {duplicatedRooms.map((room, idx) => (
@@ -105,7 +105,7 @@ export function Marquee({ rooms, reviews }: MarqueeProps) {
           transition={{
             repeat: Infinity,
             ease: "linear",
-            duration: 40,
+            duration: 85,
           }}
         >
           {duplicatedReviews.map((rev, idx) => (
