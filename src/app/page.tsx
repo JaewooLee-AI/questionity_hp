@@ -4,6 +4,9 @@ import { SpaceBento } from "@/components/sections/SpaceBento";
 import { VirtualPreviewMarquee } from "@/components/sections/VirtualPreviewMarquee";
 import { FloatingChat } from "@/components/chat/FloatingChat";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default function Home() {
   return (
     <div className="relative">
