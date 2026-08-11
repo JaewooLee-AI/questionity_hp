@@ -11,10 +11,10 @@ export function VirtualPreviewMarquee() {
 
   const fetchRoomsAndReviews = async () => {
     try {
-      // 1. Fetch real rooms from Supabase 'rooms' table according to admin guide schema
+      // 1. Fetch real rooms using select("*")
       const { data: roomsData, error: roomsError } = await supabase
         .from("rooms")
-        .select("id, title, book_title, book_author, book_description, book_image_url, publisher, target_audience, curriculum_json, meeting_type, location, schedule_text, price_text, max_capacity, created_at, is_ai_generated, is_custom_created")
+        .select("*")
         .order("created_at", { ascending: false });
 
       const roomsMap: Record<string, any> = {};
@@ -23,6 +23,7 @@ export function VirtualPreviewMarquee() {
       if (roomsData && roomsData.length > 0 && !roomsError) {
         realRooms = roomsData.map((r: any) => {
           roomsMap[r.id] = r;
+          const isCustom = r.is_custom_created === true || r.is_ai_generated === false;
           return {
             id: r.id,
             title: r.title,
@@ -39,23 +40,30 @@ export function VirtualPreviewMarquee() {
             schedule_text: r.schedule_text || "매주 수요일 19:30 (선착순 개강)",
             price_text: r.price_text || "파운딩 0원 (무료)",
             max_capacity: r.max_capacity || 12,
-            is_ai_generated: r.is_ai_generated ?? true,
-            is_custom_created: r.is_custom_created ?? true, // Opened in admin
-            predicted_by: "관리자 개설 독서방",
+            is_ai_generated: r.is_ai_generated ?? !isCustom,
+            is_custom_created: isCustom,
+            predicted_by: isCustom ? "관리자 개설 독서방" : "AI 큐레이션",
             vote_count: 50,
           };
         });
 
-        // 🌟 Merge real rooms from Supabase + fallback AI rooms
-        setRooms([...realRooms, ...FALLBACK_VIRTUAL_ROOMS]);
+        // 🌟 Filter ONLY AI-curated rooms for this marquee section
+        const aiOnlyRooms = realRooms.filter((r) => !r.is_custom_created);
+
+        if (aiOnlyRooms.length > 0) {
+          setRooms(aiOnlyRooms);
+        } else {
+          setRooms(realRooms);
+        }
       } else {
+        if (roomsError) console.error("Supabase rooms fetch error:", roomsError);
         setRooms(FALLBACK_VIRTUAL_ROOMS);
       }
 
-      // 2. Fetch real reviews from Supabase 'reviews' table
+      // 2. Fetch real reviews using select("*")
       const { data: reviewsData, error: reviewsError } = await supabase
         .from("reviews")
-        .select("id, room_id, fake_user_persona, content, created_at")
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (reviewsData && reviewsData.length > 0 && !reviewsError) {
@@ -72,9 +80,9 @@ export function VirtualPreviewMarquee() {
           };
         });
 
-        // 🌟 Merge real reviews from Supabase + fallback AI reviews
-        setReviews([...realReviews, ...FALLBACK_VIRTUAL_REVIEWS]);
+        setReviews(realReviews);
       } else {
+        if (reviewsError) console.error("Supabase reviews fetch error:", reviewsError);
         setReviews(FALLBACK_VIRTUAL_REVIEWS);
       }
     } catch (err) {
@@ -122,17 +130,16 @@ export function VirtualPreviewMarquee() {
     <section id="preview-section" className="py-24 bg-white border-t border-black/5 relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4 mb-12">
         <span className="text-[#0066cc] text-xs font-mono font-semibold tracking-widest uppercase block">
-          REAL-TIME OPENED CATALOG
+          AUTHENTIC PRE-LAUNCH CATALOG
         </span>
         <h2 className="font-heading text-3xl sm:text-5xl font-semibold text-[#1d1d1f] tracking-tight">
-          대학로 개설 독서방 &amp; <br className="sm:hidden" />
+          AI 큐레이션 트렌드 도서 &amp; <br className="sm:hidden" />
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#0066cc] via-[#0071e3] to-[#2997ff]">
-            실제 모임 기대평 프리뷰
+            가상 모임 기대평 프리뷰
           </span>
         </h2>
         <p className="text-base sm:text-lg text-[#6e6e73] font-normal max-w-2xl mx-auto break-keep">
-          어드민 관리자가 직접 개설한 실제 독서방과 AI가 큐레이션한 가상 독서 카탈로그입니다. 
-          도서 표지를 클릭하여 4주 커리큘럼 및 상세 정보를 살펴보고 파운딩 1호 대기자로 등록해 주세요.
+          어드민 자동화 파이프라인으로 생성된 도서 모임과 멤버 기대평입니다. 마음에 드는 독서방에 투표해 1호 대기자로 등록해 보세요.
         </p>
       </div>
 

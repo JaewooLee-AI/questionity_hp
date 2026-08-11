@@ -14,6 +14,7 @@ export interface VirtualRoom {
   schedule_text?: string;
   price_text?: string;
   max_capacity?: number;
+  status?: "recruiting" | "in_progress" | "completed" | string;
   is_ai_generated?: boolean;
   is_custom_created?: boolean;
   predicted_by?: string;
@@ -31,32 +32,6 @@ export interface VirtualReview {
 }
 
 export const FALLBACK_VIRTUAL_ROOMS: VirtualRoom[] = [
-  {
-    id: "vr-decisive-1",
-    title: "결정이후: 최고의 의사결정 프레임워크 4주 클럽",
-    book_title: "결정이후 (Decisive)",
-    book_author: "칩 히스, 댄 히스",
-    book_description: "후회 없는 선택을 내리는 WRAP 프레임워크와 의사결정의 4대 장애물을 극복하는 지적 실천 모임입니다.",
-    description: "후회 없는 선택을 내리는 WRAP 프레임워크와 의사결정의 4대 장애물을 극복하는 지적 실천 모임입니다.",
-    book_image_url: "https://image.aladin.co.kr/product/2740/15/coversum/8935210129_1.jpg",
-    publisher: "웅진지식하우스",
-    target_audience: "중요한 사업 및 인생의 결정 앞에서 최선의 선택을 내리고 싶은 리더, 기획자, 파운딩 멤버",
-    curriculum_json: {
-      "1주차": "1주차: 선택안의 폭을 넓혀라 (Narrow Framing 극복하기)",
-      "2주차": "2주차: 검증을 거쳐라 (확증 편향 조각내기)",
-      "3주차": "3주차: 결정 전 거리를 두라 (감정의 소용돌이 벗어나기)",
-      "4주차": "4주차: 틀릴 가능성에 대비하라 (최선의 액션 플랜 수립)"
-    },
-    meeting_type: "offline",
-    location: "대학로 Work & Share 메인 라운지",
-    schedule_text: "매주 목요일 19:30 (선착순 12명)",
-    price_text: "파운딩 0원 (무료)",
-    max_capacity: 12,
-    is_ai_generated: false,
-    is_custom_created: true,
-    predicted_by: "관리자 확정 개설",
-    vote_count: 88,
-  },
   {
     id: "vr-1",
     title: "도둑맞은 집중력 깊이 읽기 모임",
@@ -80,37 +55,11 @@ export const FALLBACK_VIRTUAL_ROOMS: VirtualRoom[] = [
     max_capacity: 12,
     is_ai_generated: true,
     is_custom_created: false,
-    predicted_by: "AI",
+    predicted_by: "AI 큐레이션",
     vote_count: 42,
   },
   {
     id: "vr-2",
-    title: "대학로 밤샘 문학 클럽",
-    book_title: "밤샘 문학 이야기",
-    book_author: "김문학",
-    book_description: "연극 무대 뒤의 숨겨진 이야기와 명작 소설의 기호학을 함께 토론합니다.",
-    description: "연극 무대 뒤의 숨겨진 이야기와 명작 소설의 기호학을 함께 토론합니다.",
-    book_image_url: "https://image.aladin.co.kr/product/31832/26/coversum/k692833228_1.jpg",
-    publisher: "대학로출판",
-    target_audience: "예술과 심야 소극장의 감성을 사랑하는 문학 기호학자",
-    curriculum_json: [
-      "1주차: 텍스트 너머의 서사 구조 파악하기",
-      "2주차: 연극 연출자의 시선으로 소설 재해석하기",
-      "3주차: 심야 토론과 대학로 예술사 톺아보기",
-      "4주차: 나만의 짤막한 기호학 에세이 완성"
-    ],
-    meeting_type: "offline",
-    location: "대학로 Work & Share 세미나룸",
-    schedule_text: "매주 금요일 20:00 (10/17 개강)",
-    price_text: "파운딩 0원 (무료)",
-    max_capacity: 10,
-    is_ai_generated: false,
-    is_custom_created: true,
-    predicted_by: "관리자 직접 개설",
-    vote_count: 38,
-  },
-  {
-    id: "vr-3",
     title: "INFP를 위한 마음 정리 책방",
     book_title: "외로운 건 싫은데 혼자 있고 싶어",
     book_author: "우유곽",
@@ -132,20 +81,12 @@ export const FALLBACK_VIRTUAL_ROOMS: VirtualRoom[] = [
     max_capacity: 8,
     is_ai_generated: true,
     is_custom_created: false,
-    predicted_by: "AI",
+    predicted_by: "AI 큐레이션",
     vote_count: 55,
   },
 ];
 
 export const FALLBACK_VIRTUAL_REVIEWS: VirtualReview[] = [
-  {
-    id: "rev-0",
-    book_title: "결정이후",
-    author: "칩 히스, 댄 히스",
-    content: "살면서 직면하는 수많은 선택 장애와 우유부단함에서 벗어나는 확실한 프레임워크를 만났습니다. 대학로 현장에서 멤버들과 치열하게 논의할 생각에 설렙니다.",
-    fake_user_persona: "개설자 추천 후기 (전략기획팀 팀장)",
-    rating: 5.0,
-  },
   {
     id: "rev-1",
     book_title: "도둑맞은 집중력",
