@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -43,6 +43,14 @@ export function ResponsiveLeadForm({ isOpen, onClose, defaultBookTitle }: Respon
     },
   });
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    if (isOpen) window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const onSubmit = async (values: FormValues) => {
@@ -74,7 +82,7 @@ export function ResponsiveLeadForm({ isOpen, onClose, defaultBookTitle }: Respon
 
   const formContent = (
     <div className="space-y-4 text-left">
-      <div className="text-center sm:text-left">
+      <div className="text-center sm:text-left pr-14 sm:pr-16">
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#0071e3]/10 text-[#0066cc] border border-[#0071e3]/20 mb-2">
           <Sparkles className="w-3.5 h-3.5" /> 파운딩 멤버 100인 모집
         </div>
@@ -179,18 +187,23 @@ export function ResponsiveLeadForm({ isOpen, onClose, defaultBookTitle }: Respon
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+    >
       <div
+        onClick={(e) => e.stopPropagation()}
         className={`relative w-full max-w-lg bg-white border border-black/10 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden ${
           isMobile ? "fixed bottom-0 left-0 right-0 rounded-b-none rounded-t-3xl max-w-full animate-in slide-in-from-bottom duration-300" : ""
         }`}
       >
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-[#86868b] hover:text-[#1d1d1f] p-2 rounded-full hover:bg-black/5 transition-colors"
+          className="absolute top-4 right-4 text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] border border-black/10 p-2 sm:p-2.5 rounded-full shadow-xs transition-all z-10 flex items-center gap-1"
           aria-label="닫기"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5 text-[#1d1d1f]" />
+          <span className="hidden sm:inline text-xs font-semibold pr-1">닫기</span>
         </button>
         {formContent}
       </div>

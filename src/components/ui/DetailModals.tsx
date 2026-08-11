@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { X, Sparkles, ThumbsUp, BookOpen, Star, MapPin, Calendar, Users, Layers } from "lucide-react";
+import React, { useEffect } from "react";
+import { X, Sparkles, ThumbsUp, BookOpen, Star, MapPin, Users, Layers } from "lucide-react";
 import { VirtualRoom, VirtualReview } from "@/lib/mockData";
 
 interface RoomDetailModalProps {
@@ -11,6 +11,14 @@ interface RoomDetailModalProps {
 }
 
 export function RoomDetailModal({ room, onClose, onOpenLeadForm }: RoomDetailModalProps) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    if (room) window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [room, onClose]);
+
   if (!room) return null;
 
   // Format curriculum_json
@@ -29,19 +37,26 @@ export function RoomDetailModal({ room, onClose, onOpenLeadForm }: RoomDetailMod
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-xl bg-white border border-black/10 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden text-left space-y-6 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
-        {/* Close Button */}
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-xl bg-white border border-black/10 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden text-left space-y-6 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto"
+      >
+        {/* Highly Visible Prominent Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-[#86868b] hover:text-[#1d1d1f] p-2 rounded-full hover:bg-black/5 transition-colors"
+          className="absolute top-4 right-4 text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] border border-black/10 p-2 sm:p-2.5 rounded-full shadow-xs transition-all z-10 flex items-center gap-1"
           aria-label="닫기"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5 text-[#1d1d1f]" />
+          <span className="hidden sm:inline text-xs font-semibold pr-1">닫기</span>
         </button>
 
         {/* Header Badge */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 pr-16 sm:pr-20">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#0071e3]/10 text-[#0066cc] border border-[#0071e3]/20">
             <Sparkles className="w-3.5 h-3.5" /> ✨ AI Predicted Room
           </span>
@@ -157,22 +172,37 @@ interface ReviewDetailModalProps {
 }
 
 export function ReviewDetailModal({ review, onClose, onOpenLeadForm }: ReviewDetailModalProps) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    if (review) window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [review, onClose]);
+
   if (!review) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-white border border-black/10 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden text-left space-y-6 animate-in zoom-in-95 duration-200">
-        {/* Close Button */}
+    <div
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-lg bg-white border border-black/10 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden text-left space-y-6 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto"
+      >
+        {/* Highly Visible Prominent Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-[#86868b] hover:text-[#1d1d1f] p-2 rounded-full hover:bg-black/5 transition-colors"
+          className="absolute top-4 right-4 text-[#1d1d1f] bg-[#f5f5f7] hover:bg-[#e8e8ed] border border-black/10 p-2 sm:p-2.5 rounded-full shadow-xs transition-all z-10 flex items-center gap-1"
           aria-label="닫기"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5 text-[#1d1d1f]" />
+          <span className="hidden sm:inline text-xs font-semibold pr-1">닫기</span>
         </button>
 
         {/* Header Badge */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pr-16 sm:pr-20">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#0071e3]/10 text-[#0066cc] border border-[#0071e3]/20">
             <Sparkles className="w-3.5 h-3.5" /> ✨ AI Predicted 독후감
           </span>
